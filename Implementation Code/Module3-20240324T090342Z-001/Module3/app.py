@@ -97,7 +97,7 @@ def home():
         # return redirect(url_for('map_1' , map=routes_map._repr_html_()) )
         return render_template('map_1.html' , map=routes_map._repr_html_(), source=source, destination=destination)
     
-    return render_template('index.html' , posts=posts)
+    return render_template('home.html' , posts=posts)
 
 @app.route('/dashboard' , methods=['GET', 'POST'] )
 def dashboardv():
@@ -257,3 +257,4 @@ def help():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
