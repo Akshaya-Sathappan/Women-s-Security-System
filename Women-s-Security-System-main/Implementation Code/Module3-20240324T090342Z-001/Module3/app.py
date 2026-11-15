@@ -216,7 +216,7 @@ def home():
             routes_map = utils.create_map(route)
         except ValueError as e:
             # Address not found or no route: tell the user what to fix
-            flash(f'{e}. Try a more specific address, e.g. "Anna Nagar, Chennai".', 'error')
+            flash(f'{e}. Try a more specific address that includes the city and country.', 'error')
             return render_template('home.html', posts=posts)
         except Exception as e:
             print(f'Route lookup failed: {e}')
@@ -296,7 +296,7 @@ def map_2():
         # Find nearest police station
         results = utils.get_nearest_police_stations(state["latitude"], state["longitude"]).get("results") or []
         if not results:
-            return jsonify({"status": "error", "error": "No police station found within 2 km"}), 404
+            return jsonify({"status": "error", "error": "No police station found within 10 km"}), 404
         # TrueWay also tags things like traffic cameras as police_station; prefer real stations
         nearest = next((r for r in results if "police" in r.get("name", "").lower()), results[0])
         state["police_station_name"] = nearest["name"]
@@ -337,6 +337,32 @@ def map_2_police():
                            message=message)
 
 
+def local_emergency_number(state: dict) -> str:
+    """Local emergency number for the user's last known location (cached per location)."""
+    lat, lng = state.get("latitude"), state.get("longitude")
+    if lat is None or lng is None:
+        return utils.DEFAULT_EMERGENCY_NUMBER
+    key = (round(lat, 2), round(lng, 2))
+    if state.get("emergency_key") != key:
+        state["emergency_key"] = key
+        state["emergency_info"] = utils.get_emergency_number(lat, lng)
+    return state["emergency_info"]["number"]
+
+
+@app.route('/emergency-number')
+@login_required
+def emergency_number():
+    """Return the local emergency number for ?lat=&lng= (used by the SOS page)."""
+    state = get_state()
+    try:
+        state["latitude"] = float(request.args["lat"])
+        state["longitude"] = float(request.args["lng"])
+    except (KeyError, ValueError):
+        return jsonify({"number": utils.DEFAULT_EMERGENCY_NUMBER, "country": ""})
+    number = local_emergency_number(state)
+    return jsonify({"number": number, "country": state["emergency_info"].get("country", "")})
+
+
 @app.route('/help', methods=['GET', 'POST'])
 @login_required
 def help_route():
@@ -353,23 +379,27 @@ def help_route():
         if payload.get("latitude") is not None and payload.get("longitude") is not None:
             state["latitude"], state["longitude"] = payload["latitude"], payload["longitude"]
 
+        number = local_emergency_number(state)
+        call_now = f"Please call your local emergency number ({number}) directly."
+
         if not emergency_contact:
-            return jsonify({"status": "failed", "emergency_contact": None,
-                            "error": "No emergency contact set. Add an emergency contact email on the Dashboard."}), 400
+            return jsonify({"status": "failed", "emergency_contact": None, "emergency_number": number,
+                            "error": "No emergency contact set. Add an emergency contact email on the Dashboard. "
+                                     + call_now}), 400
 
         try:
             utils.send_email(emergency_contact, user_name, state["latitude"], state["longitude"])
         except smtplib.SMTPAuthenticationError as e:
             print(f'SOS email login failed: {e}')
-            return jsonify({"status": "failed", "emergency_contact": emergency_contact,
+            return jsonify({"status": "failed", "emergency_contact": emergency_contact, "emergency_number": number,
                             "error": "The app's email account could not log in, so the alert was not sent. "
-                                     "Please call emergency services directly (112)."}), 502
+                                     + call_now}), 502
         except Exception as e:
             print(f'SOS email failed: {e}')
-            return jsonify({"status": "failed", "emergency_contact": emergency_contact,
-                            "error": "The alert could not be sent. Please call emergency services directly (112)."}), 502
+            return jsonify({"status": "failed", "emergency_contact": emergency_contact, "emergency_number": number,
+                            "error": "The alert could not be sent. " + call_now}), 502
 
-        return jsonify({"status": "success", "emergency_contact": emergency_contact})
+        return jsonify({"status": "success", "emergency_contact": emergency_contact, "emergency_number": number})
 
     return render_template('help.html',
                            emergency_contact=emergency_contact,

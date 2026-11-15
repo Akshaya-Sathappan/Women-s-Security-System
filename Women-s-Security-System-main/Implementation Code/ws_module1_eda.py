@@ -1,8 +1,11 @@
-"""Module 1: Exploratory analysis of the Chennai crime data.
+"""Module 1: Exploratory analysis of a city's crime data.
 
-Run:  python ws_module1_eda.py
+Run:  python ws_module1_eda.py                         (bundled Chennai case study)
+      python ws_module1_eda.py --data my_city.csv      (any city with the same columns)
 Plots are written to the outputs/ folder.
 """
+import argparse
+
 import matplotlib
 
 matplotlib.use("Agg")  # write plots to files; no display needed
@@ -10,7 +13,7 @@ matplotlib.use("Agg")  # write plots to files; no display needed
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from crime_data import CRIME_COLUMNS, load_clean_data, save_figure
+from crime_data import CRIME_COLUMNS, add_data_args, load_from_args, save_figure
 
 
 def plot_crime_distributions(data):
@@ -41,8 +44,12 @@ def plot_total_crimes(data):
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Exploratory analysis of a city's crime data")
+    add_data_args(parser)
+    args = parser.parse_args()
+
     sns.set_style("whitegrid")
-    data = load_clean_data()
+    data = load_from_args(args)
 
     print("\nFirst rows:")
     print(data.head())

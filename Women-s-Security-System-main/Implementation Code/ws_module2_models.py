@@ -1,7 +1,8 @@
 """Module 2: Classifying locations as safe or unsafe.
 
-Run:  python ws_module2_models.py            (all models, including the neural network)
-      python ws_module2_models.py --no-nn    (skip the neural network / TensorFlow)
+Run:  python ws_module2_models.py                     (bundled Chennai case study, all models)
+      python ws_module2_models.py --no-nn             (skip the neural network / TensorFlow)
+      python ws_module2_models.py --data my_city.csv  (any city with the same columns)
 Confusion matrices and training curves are written to the outputs/ folder.
 
 Labels: a location is unsafe (1) if its total crime count is above the median, otherwise safe (0).
@@ -38,7 +39,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.tree import DecisionTreeClassifier
 
-from crime_data import OUTPUT_DIR, load_clean_data, save_figure
+from crime_data import OUTPUT_DIR, add_data_args, load_from_args, save_figure
 
 RANDOM_STATE = 42
 
@@ -138,11 +139,12 @@ def train_neural_network(X_train, X_test, y_train, y_test):
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--no-nn", action="store_true", help="skip the neural network (no TensorFlow needed)")
+    add_data_args(parser)
     args = parser.parse_args()
 
     np.random.seed(RANDOM_STATE)
     sns.set_style("whitegrid")
-    data = load_clean_data()
+    data = load_from_args(args)
 
     median_crimes = data["Total_Crimes"].median()
     data["Label"] = (data["Total_Crimes"] > median_crimes).astype(int)

@@ -1,4 +1,5 @@
 import html
+from datetime import datetime, timezone
 import os
 import requests
 import folium
@@ -140,18 +141,65 @@ def get_nearest_police_stations(my_lat: float, my_long: float) -> Dict[str, Any]
         JSON response containing nearby police stations.
     """
     url = "https://trueway-places.p.rapidapi.com/FindPlacesNearby"
-    querystring = {
-        "location": f"{my_lat},{my_long}",
-        "type": "police_station",
-        "radius": "2000",  # in meters
-        "language": "en"
-    }
     headers = {
         "X-RapidAPI-Key": _require_env("RAPIDAPI_KEY"),
         "X-RapidAPI-Host": "trueway-places.p.rapidapi.com"
     }
-    response = requests.get(url, headers=headers, params=querystring, timeout=15)
-    return response.json()
+    # Start close by and widen the search, so it also works outside dense city centres
+    data = {"results": []}
+    for radius in POLICE_SEARCH_RADII_M:
+        querystring = {
+            "location": f"{my_lat},{my_long}",
+            "type": "police_station",
+            "radius": str(radius),  # in meters
+            "language": "en"
+        }
+        response = requests.get(url, headers=headers, params=querystring, timeout=15)
+        data = response.json()
+        if data.get("results"):
+            break
+    return data
+
+
+# ---------------------- Local Emergency Numbers ----------------------
+POLICE_SEARCH_RADII_M = (2000, 5000, 10000)
+
+# 112 is the international standard number and is routed to local emergency
+# services by mobile networks in most countries, so it is the fallback.
+DEFAULT_EMERGENCY_NUMBER = "112"
+EMERGENCY_NUMBERS = {
+    "us": "911", "ca": "911", "mx": "911", "ph": "911", "ar": "911", "sa": "911",
+    "gb": "999", "hk": "999", "sg": "999", "my": "999", "ae": "999", "bd": "999",
+    "ke": "999", "qa": "999",
+    "au": "000", "nz": "111", "za": "10111",
+    "jp": "110", "cn": "110", "tw": "110",
+    "br": "190", "th": "191", "vn": "113", "eg": "122", "lk": "119",
+    "il": "100", "np": "100", "pk": "15", "co": "123", "pe": "105", "cl": "133",
+    # Countries that use 112 (all of the EU, India, Russia, Türkiye, Korea, ...)
+    # fall through to DEFAULT_EMERGENCY_NUMBER.
+}
+
+
+def get_emergency_number(lat: float, long: float) -> Dict[str, str]:
+    """
+    Look up the local emergency number for a location.
+
+    Returns:
+        {"number": "911", "country": "United States"}; falls back to 112 if the
+        country cannot be determined.
+    """
+    try:
+        locator = Nominatim(user_agent='women_safety_app')
+        place = locator.reverse((lat, long), zoom=3, language='en', timeout=10)
+        address = place.raw.get('address', {}) if place else {}
+        code = address.get('country_code', '').lower()
+        return {
+            "number": EMERGENCY_NUMBERS.get(code, DEFAULT_EMERGENCY_NUMBER),
+            "country": address.get('country', ''),
+        }
+    except Exception as e:
+        print(f'Emergency number lookup failed: {e}')
+        return {"number": DEFAULT_EMERGENCY_NUMBER, "country": ""}
 
 
 # ---------------------- Email Alert ----------------------
@@ -178,7 +226,8 @@ def send_email(mail_receiver: str, name: str, lat: float, long: float) -> None:
         location = f'({lat}, {long})\nMap: https://www.google.com/maps?q={lat},{long}'
     else:
         location = 'unknown (location access was not available)'
-    body = f'Emergency Help Request from {name}.\nLast known location: {location}'
+    sent_at = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M UTC')
+    body = f'Emergency Help Request from {name}.\nSent: {sent_at}\nLast known location: {location}'
 
     em = EmailMessage()
     em['From'] = mail_sender
