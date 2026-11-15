@@ -1,2 +1,0 @@
-# Count Python as the primary language (templates contain large inline SVG icons)
-*.html linguist-detectable=false
