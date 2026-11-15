@@ -1,0 +1,8 @@
+# Analysis scripts (ws_module1_eda.py, ws_module2_models.py)
+pandas>=2.1.0
+openpyxl>=3.1.0
+matplotlib>=3.7.0
+seaborn>=0.12.0
+scikit-learn>=1.3.0
+# Only needed for the neural network; skip it with: python ws_module2_models.py --no-nn
+tensorflow>=2.15

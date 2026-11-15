@@ -1,0 +1,14 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Temp file written while saving user data
+*.json.tmp
+
+# Generated plots from the analysis scripts
+outputs/
