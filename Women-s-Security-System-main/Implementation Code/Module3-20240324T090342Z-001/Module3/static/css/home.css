@@ -364,3 +364,18 @@ body {
 
 
 }
+.flash-messages{
+    list-style: none;
+}
+
+.error-message{
+    color: #b00020;
+    background: #fde7ea;
+    padding: .6rem .8rem;
+    border-radius: 8px;
+    font-size: .9rem;
+}
+
+.sidebar img.logo{
+    padding: 1rem .75rem 0;
+}

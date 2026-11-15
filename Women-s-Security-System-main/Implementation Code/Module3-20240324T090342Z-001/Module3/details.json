@@ -1,1 +1,23 @@
-{"login": {"user@gmail.com": "password", "Akshaya": "qwerty"}, "profile": {"username": "Akshaya", "email": "aks@gmail.com", "contact": "7894561200", "address": "Edward Street", "emergency": "aks@gmail.com"}}
+{
+  "login": {
+    "user@gmail.com": "pbkdf2:sha256:600000$VKJ9dVrEmseYHMof$7642918b19fe53cbd6cdbc57f30f70d3310a336af889d4e97060e17c994200fe",
+    "Akshaya": "pbkdf2:sha256:600000$yeyLbwg21IhmTgSA$add82513356b9dab27504e8eb4134d2d20fbb255098cbbb3be0199fb61bb939b",
+    "akshaya14": "pbkdf2:sha256:600000$AeiAOuERlpHd6mqL$4c88a765b1ebfafebe4e3ead3cc3a629f33b8db7a41a17fe79224ed4d4e0b626"
+  },
+  "profiles": {
+    "Akshaya": {
+      "username": "Akshaya",
+      "email": "aks@gmail.com",
+      "contact": "7894561200",
+      "address": "Edward Street",
+      "emergency": "aks@gmail.com"
+    },
+    "akshaya14": {
+      "username": "akshaya14",
+      "email": "akshaya.sathappan123@gmail.com",
+      "contact": "3233423389",
+      "address": "3029 SHRINE PL APT 3",
+      "emergency": "akshaya.sathappan123@gmail.com"
+    }
+  }
+}

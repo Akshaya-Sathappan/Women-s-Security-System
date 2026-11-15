@@ -10,7 +10,7 @@
 
 <body>
     <div class="sidebar">
-        <img src="../static/images/logo.png" />
+        <img class="logo" src="{{ url_for('static', filename='images/logo.svg') }}" alt="Women Safety logo" />
         <div class="sildebar-menu">
             <a href="./home" class=" ">
                 <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" fill="none">
@@ -60,10 +60,10 @@
                         fill="#263238" />
                 </svg>
             </a>
-            <a href="/" style="text-decoration: none; color: black; font-size: 1.2rem; border: 2px solid black ; padding: .5rem 1rem; border-radius: 10px;"> logout </a>
+            <a href="/logout" style="text-decoration: none; color: black; font-size: 1.2rem; border: 2px solid black ; padding: .5rem 1rem; border-radius: 10px;"> logout </a>
         </div>
         <div>
-            <img class="munu-icon" src="../static/images/munu-icon.png" />
+            <img class="munu-icon" src="{{ url_for('static', filename='images/menu-icon.svg') }}" alt="Menu" />
         </div>
     </div>
 

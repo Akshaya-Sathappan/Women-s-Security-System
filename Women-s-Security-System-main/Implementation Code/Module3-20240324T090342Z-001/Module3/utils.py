@@ -1,3 +1,5 @@
+import html
+import os
 import requests
 import folium
 from geopy.geocoders import Nominatim
@@ -8,6 +10,16 @@ import smtplib
 from typing import Tuple, Dict, Any
 
 
+# ---------------------- Configuration ----------------------
+# Secrets are read from environment variables, never hardcoded.
+# See .env.example for the full list.
+def _require_env(name: str) -> str:
+    value = os.environ.get(name)
+    if not value:
+        raise RuntimeError(f"Missing required environment variable: {name}")
+    return value
+
+
 # ---------------------- News Retrieval ----------------------
 def get_news() -> Dict[str, Any]:
     """
@@ -16,11 +28,11 @@ def get_news() -> Dict[str, Any]:
     Returns:
         JSON response from NewsAPI containing news articles.
     """
-    url = (
-        "https://newsapi.org/v2/everything?"
-        "q=women%20safety&apiKey=edaddbc3add54ca8920075e114cfec09"
-    )
-    response = requests.get(url)
+    url = "https://newsapi.org/v2/everything"
+    params = {"q": "women safety"}
+    headers = {"X-Api-Key": _require_env("NEWS_API_KEY")}
+    response = requests.get(url, params=params, headers=headers, timeout=10)
+    response.raise_for_status()
     return response.json()
 
 
@@ -38,7 +50,7 @@ def get_lat_long_from_address(address: str) -> Tuple[float, float]:
     locator = Nominatim(user_agent='women_safety_app')
     location = locator.geocode(address)
     if not location:
-        raise ValueError(f"Could not geocode address: {address}")
+        raise ValueError(f'Could not find the address "{address}"')
     return location.latitude, location.longitude
 
 
@@ -57,26 +69,31 @@ def get_route(lat1: float, long1: float, lat2: float, long2: float) -> requests.
     url = "https://trueway-directions2.p.rapidapi.com/FindDrivingRoute"
     querystring = {"stops": f"{lat1},{long1};{lat2},{long2}"}
     headers = {
-        "X-RapidAPI-Key": "d136a898admsh769a12d85806a56p1d0f24jsna19b023692ae",
+        "X-RapidAPI-Key": _require_env("RAPIDAPI_KEY"),
         "X-RapidAPI-Host": "trueway-directions2.p.rapidapi.com"
     }
-    return requests.get(url, headers=headers, params=querystring)
+    response = requests.get(url, headers=headers, params=querystring, timeout=15)
+    if response.status_code != 200:
+        raise RuntimeError(f"Route service error {response.status_code}: {response.text[:200]}")
+    return response
 
 
 def create_map(response: requests.Response) -> folium.Map:
     """
     Create a folium map with a route plotted from API response.
-    
+
     Args:
         response: Response object from get_route function.
-    
+
     Returns:
         Folium Map object with route plotted.
     """
-    route_coords = response.json()['route']['geometry']['coordinates']
-    
-    # Convert [lon, lat] to (lat, lon) tuples
-    points = [(coord[1], coord[0]) for coord in route_coords]
+    route = response.json().get('route')
+    if not route:
+        raise ValueError("No route found between these locations")
+
+    # TrueWay returns coordinates as [lat, lon], which is the order folium expects
+    points = [(coord[0], coord[1]) for coord in route['geometry']['coordinates']]
 
     m = folium.Map()
 
@@ -94,6 +111,21 @@ def create_map(response: requests.Response) -> folium.Map:
     m.fit_bounds([sw, ne])
 
     return m
+
+
+def map_to_html(m: folium.Map, height: int = 500) -> str:
+    """
+    Render a folium map as a self-contained iframe for embedding in a web page.
+
+    folium's _repr_html_() is meant for Jupyter and adds a
+    "Make this Notebook Trusted" message, so it is not used here.
+    """
+    page = m.get_root().render()
+    return (
+        f'<iframe srcdoc="{html.escape(page, quote=True)}" '
+        f'style="width:100%;height:{height}px;border:0;border-radius:12px;" '
+        'loading="lazy" title="Route map"></iframe>'
+    )
 
 
 # ---------------------- Nearby Police Stations ----------------------
@@ -115,10 +147,10 @@ def get_nearest_police_stations(my_lat: float, my_long: float) -> Dict[str, Any]
         "language": "en"
     }
     headers = {
-        "X-RapidAPI-Key": "d136a898admsh769a12d85806a56p1d0f24jsna19b023692ae",
+        "X-RapidAPI-Key": _require_env("RAPIDAPI_KEY"),
         "X-RapidAPI-Host": "trueway-places.p.rapidapi.com"
     }
-    response = requests.get(url, headers=headers, params=querystring)
+    response = requests.get(url, headers=headers, params=querystring, timeout=15)
     return response.json()
 
 
@@ -133,15 +165,20 @@ def send_email(mail_receiver: str, name: str, lat: float, long: float) -> None:
         lat, long: Coordinates of the person
     
     Notes:
-        Requires setting valid `mail_sender` and `mail_password` for Gmail SMTP.
+        Requires the MAIL_SENDER and MAIL_PASSWORD (Gmail app password)
+        environment variables.
     """
     print("************* Sending Email *************")
     
-    mail_sender = ''  # Your Gmail address
-    mail_password = ''  # Your Gmail app password
+    mail_sender = _require_env("MAIL_SENDER")
+    mail_password = _require_env("MAIL_PASSWORD")
     
     subject = 'Emergency Alert'
-    body = f'Emergency Help Request from {name} at location: ({lat}, {long})'
+    if lat is not None and long is not None:
+        location = f'({lat}, {long})\nMap: https://www.google.com/maps?q={lat},{long}'
+    else:
+        location = 'unknown (location access was not available)'
+    body = f'Emergency Help Request from {name}.\nLast known location: {location}'
 
     em = EmailMessage()
     em['From'] = mail_sender
@@ -151,5 +188,9 @@ def send_email(mail_receiver: str, name: str, lat: float, long: float) -> None:
 
     context = ssl.create_default_context()
     with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
-        smtp.login(mail_sender, mail_password)
+        try:
+            smtp.login(mail_sender, mail_password)
+        except smtplib.SMTPServerDisconnected as e:
+            # Gmail hangs up after rejecting the credentials, which smtplib reports as a disconnect
+            raise smtplib.SMTPAuthenticationError(535, b"Gmail rejected MAIL_SENDER / MAIL_PASSWORD") from e
         smtp.send_message(em)

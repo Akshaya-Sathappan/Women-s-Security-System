@@ -14,17 +14,13 @@
   <body>
     <div class="img-login"></div>
     <div class="container">
-      <!-- {% with messages = get_flashed_messages() %} {% if messages %}
-      <ul>
-        {% for message in messages %} {% if 'success' in message %}
-        <li class="success-message">{{ message }}</li>
-        {% elif 'error' in message %}
-        <li class="error-message">{{ message }}</li>
-        {% else %}
-        <li>{{ message }}</li>
-        {% endif %} {% endfor %}
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if messages %}
+      <ul class="flash-messages">
+        {% for category, message in messages %}
+        <li class="{{ category }}-message">{{ message }}</li>
+        {% endfor %}
       </ul>
-      {% endif %} {% endwith %} -->
+      {% endif %} {% endwith %}
 
       <form class="form" method="POST" action="./">
         <div>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150" role="img" aria-label="Profile picture">
+  <defs>
+    <clipPath id="c"><circle cx="75" cy="75" r="70"/></clipPath>
+  </defs>
+  <circle cx="75" cy="75" r="72" fill="#fff"/>
+  <circle cx="75" cy="75" r="70" fill="#E6BFFF"/>
+  <g clip-path="url(#c)" fill="#61439A">
+    <circle cx="75" cy="60" r="26"/>
+    <path d="M22 150 C22 112 46 94 75 94 C104 94 128 112 128 150 Z"/>
+  </g>
+</svg>

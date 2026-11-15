@@ -199,3 +199,6 @@ background: #FFF;
 
      }
 }
+.sidebar img.logo{
+    padding: 1rem .75rem 0;
+}

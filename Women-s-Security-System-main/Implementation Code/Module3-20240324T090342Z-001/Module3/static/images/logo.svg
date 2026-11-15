@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 130" role="img" aria-label="Women Safety">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#61439A"/>
+      <stop offset="1" stop-color="#9B7BD6"/>
+    </linearGradient>
+  </defs>
+  <!-- Shield -->
+  <path d="M80 14 L112 26 V52 C112 73 98 87 80 94 C62 87 48 73 48 52 V26 Z" fill="url(#g)"/>
+  <!-- Heart inside the shield -->
+  <path d="M80 72 C70 64 63 58 63 50 C63 44 67.5 40 72.5 40 C76 40 78.6 42 80 44.8 C81.4 42 84 40 87.5 40 C92.5 40 97 44 97 50 C97 58 90 64 80 72 Z" fill="#fff"/>
+  <text x="80" y="118" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-size="17" font-weight="700" fill="#61439A">Women Safety</text>
+</svg>

@@ -13,7 +13,7 @@
 
   <body>
     <div class="sidebar">
-      <img src="../static/images/logo.png" />
+      <img class="logo" src="{{ url_for('static', filename='images/logo.svg') }}" alt="Women Safety logo" />
       <div class="sildebar-menu">
         <a href="./home" class=" ">
           <svg
@@ -103,10 +103,10 @@
             />
           </svg>
         </a>
-        <a href="/" style="text-decoration: none; color: black; font-size: 1.2rem; border: 2px solid black ; padding: .5rem 1rem; border-radius: 10px;"> logout </a>
+        <a href="/logout" style="text-decoration: none; color: black; font-size: 1.2rem; border: 2px solid black ; padding: .5rem 1rem; border-radius: 10px;"> logout </a>
       </div>
       <div>
-        <img class="munu-icon" src="../static/images/munu-icon.png" />
+        <img class="munu-icon" src="{{ url_for('static', filename='images/menu-icon.svg') }}" alt="Menu" />
       </div>
     </div>
 
@@ -121,7 +121,7 @@
           "
         >
           <h2>Dashboard</h2>
-          <img src="../static/images/user-3.png" />
+          <img src="{{ url_for('static', filename='images/user.svg') }}" alt="Profile picture" />
         </div>
         
         <!-- <buuton class="upload-btn">Upload photo </buuton> -->
@@ -191,25 +191,15 @@
             </div>
 
             <div class="form-field">
-              <label for="emergency-number" class="form-label">
-                Emergency contact list
+              <label for="emergency-email" class="form-label">
+                Emergency contact email (receives SOS alerts)
               </label>
-              <!-- <textarea
-                required
-                rows="5"
-                cols="50"
-                class="form-control"
-                name="emergency-number"
-                id="emergency-number"
-                placeholder="{{user_details['emergency']}}"
-              > 
-              </textarea>-->
               <input
               required
-                type="text"
+                type="email"
                 class="form-control"
-                name="emergency-number"
-                id="emergency-number"
+                name="emergency-email"
+                id="emergency-email"
                 placeholder="{{user_details['emergency']}}"
               />
               

@@ -10,7 +10,7 @@
 
 <body>
     <div class="sidebar">
-        <img src="../static/images/logo.png" />
+        <img class="logo" src="{{ url_for('static', filename='images/logo.svg') }}" alt="Women Safety logo" />
         <div class="sildebar-menu">
             <a href="./home" class=" ">
                 <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" fill="none">
@@ -67,107 +67,115 @@
                     <path d="M0.918632 11.0659L11.5252 21.6725L11.5252 0.459315L0.918632 11.0659Z" fill="#61439A" />
                 </svg>
             </a>
-            <a href="/" style="text-decoration: none; color: black; font-size: 1.2rem; border: 2px solid black ; padding: .5rem 1rem; border-radius: 10px;"> logout </a>
+            <a href="/logout" style="text-decoration: none; color: black; font-size: 1.2rem; border: 2px solid black ; padding: .5rem 1rem; border-radius: 10px;"> logout </a>
         </div>
         <div>
-            <img class="munu-icon" src="../static/images/munu-icon.png" />
+            <img class="munu-icon" src="{{ url_for('static', filename='images/menu-icon.svg') }}" alt="Menu" />
         </div>
     </div>
 
     <div class="main-section">
 
         <div class="dashboard-header">
-           <h2>Map</h2> 
-           <button class="addres-btn">
-            <p>Your Current Address</p>
-            <h3>Location: ({{lat}}, {{long}})</h3>
-           </button>
-          
-        </div>
-       
-       <!-- <div class="sos" id="open-modal">
-        <div>
-            <svg xmlns="http://www.w3.org/2000/svg" width="36" height="35"  fill="none">
-                <path d="M7.79183 29.1667V26.25H10.1252L13.0054 16.6615C13.1998 16.0295 13.5586 15.5249 14.0816 15.1477C14.6047 14.7705 15.1817 14.5824 15.8127 14.5833H20.1877C20.8196 14.5833 21.3971 14.7719 21.9202 15.1492C22.4432 15.5264 22.8015 16.0305 22.995 16.6615L25.8752 26.25H28.2085V29.1667H7.79183ZM16.5418 11.6667V4.375H19.4585V11.6667H16.5418ZM25.2189 15.276L23.1408 13.1979L28.3179 8.05729L30.3595 10.099L25.2189 15.276ZM26.7502 21.875V18.9583H34.0418V21.875H26.7502ZM10.7814 15.276L5.64079 10.099L7.68246 8.05729L12.8595 13.1979L10.7814 15.276ZM1.9585 21.875V18.9583H9.25016V21.875H1.9585Z" fill="white"/>
-              </svg>
-              <form id="helpForm" action="/help" method="POST">
-                
-                <button type="submit">SOS</button>
-            </form>
-
+           <h2>Emergency SOS</h2>
+           <div class="addres-btn">
+            <p>Your Current Location</p>
+            <h3 id="current-location">
+              {% if lat is not none and long is not none %}({{ lat }}, {{ long }}){% else %}Detecting…{% endif %}
+            </h3>
+           </div>
         </div>
 
-       </div> -->
-
-       <div class="sos" id="open-modal" onclick="document.getElementById('helpForm').submit()">
+       <div class="sos" id="open-modal" role="button" tabindex="0" aria-label="Send SOS alert">
         <div>
             <svg xmlns="http://www.w3.org/2000/svg" width="36" height="35" fill="none">
                 <path d="M7.79183 29.1667V26.25H10.1252L13.0054 16.6615C13.1998 16.0295 13.5586 15.5249 14.0816 15.1477C14.6047 14.7705 15.1817 14.5824 15.8127 14.5833H20.1877C20.8196 14.5833 21.3971 14.7719 21.9202 15.1492C22.4432 15.5264 22.8015 16.0305 22.995 16.6615L25.8752 26.25H28.2085V29.1667H7.79183ZM16.5418 11.6667V4.375H19.4585V11.6667H16.5418ZM25.2189 15.276L23.1408 13.1979L28.3179 8.05729L30.3595 10.099L25.2189 15.276ZM26.7502 21.875V18.9583H34.0418V21.875H26.7502ZM10.7814 15.276L5.64079 10.099L7.68246 8.05729L12.8595 13.1979L10.7814 15.276ZM1.9585 21.875V18.9583H9.25016V21.875H1.9585Z" fill="white"/>
             </svg>
             SOS
-            <form id="helpForm" action="/help" method="POST">
-                <!-- You can add other form fields here if needed -->
-            </form>
         </div>
       </div>
-      
 
-       <!-- <button class="cancel-btn">
-        Cancel
-       </button> -->
-
-       <dialog   id="modal" class="modal-container" >
-        <buuton  id="close-modal" >   <img  src="../static/images/close-btn.png" /></buuton>
+       <dialog id="modal" class="modal-container">
+        <button id="close-modal" type="button" aria-label="Close"
+                style="float: right; border: none; background: none; font-size: 1.5rem; cursor: pointer;">✕</button>
          <div>
-            <h2 style="font-size: 1.8rem;">Help is on the way!</h2>
-           <p style="font-size: 1.2rem;">Notification sent to these contacts.</p>
+            <h2 id="modal-title" style="font-size: 1.8rem;">Sending alert…</h2>
+            <p id="modal-message" style="font-size: 1.2rem;">Getting your location and notifying your emergency contact.</p>
          </div>
          <div id="emergency-contact-section" style="margin-top: 2rem; background-color: #E6BFFF; padding: 1rem;">
-          <p style="font-size: 1.1rem;">{{emergency_contact_number}}</p>
-          <p id="emergency-contact-number" style="font-size: 1.2rem;"></p>
-      </div>
-       
+          <p id="emergency-contact-email" style="font-size: 1.1rem;">
+            {% if emergency_contact %}Emergency contact: {{ emergency_contact }}{% else %}No emergency contact set. Add one on the Dashboard.{% endif %}
+          </p>
+         </div>
        </dialog>
-    
-
 
     </div>
 
  <script>
+   const modal = document.getElementById('modal');
+   const sosButton = document.getElementById('open-modal');
+   const modalTitle = document.getElementById('modal-title');
+   const modalMessage = document.getElementById('modal-message');
+   const contactText = document.getElementById('emergency-contact-email');
+   const locationText = document.getElementById('current-location');
+   let sending = false;
 
-   // Fetch JSON data from the Flask route
-   document.getElementById('helpForm').addEventListener('submit', function (event) {
-            // Prevent the default form submission behavior
-            event.preventDefault();
+   // Resolve with {latitude, longitude}, or nulls if location is unavailable or denied
+   function getLocation() {
+     return new Promise(resolve => {
+       if (!navigator.geolocation) return resolve({ latitude: null, longitude: null });
+       navigator.geolocation.getCurrentPosition(
+         pos => resolve({ latitude: pos.coords.latitude, longitude: pos.coords.longitude }),
+         () => resolve({ latitude: null, longitude: null }),
+         { enableHighAccuracy: true, timeout: 8000, maximumAge: 60000 }
+       );
+     });
+   }
 
-            // Make a POST request to the "/help" route
-            fetch('/help', { method: 'POST' })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        // Update the modal with the emergency contact number
-                        const emergencyContactSection = document.getElementById('emergency-contact-section');
-                        const emergencyContactNumber = document.getElementById('emergency-contact-number');
+   function showLocation(loc) {
+     locationText.textContent = loc.latitude === null
+       ? 'Location unavailable (allow location access)'
+       : `(${loc.latitude.toFixed(5)}, ${loc.longitude.toFixed(5)})`;
+   }
 
-                        emergencyContactNumber.textContent = `Contact Number: ${data.emergency_contact_number}`;
-                        emergencyContactSection.style.display = 'block'; // Show the section if needed
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-        });
+   async function sendSOS() {
+     if (sending) return;
+     sending = true;
+     modalTitle.textContent = 'Sending alert…';
+     modalMessage.textContent = 'Getting your location and notifying your emergency contact.';
+     modal.showModal();
+     try {
+       const loc = await getLocation();
+       showLocation(loc);
+       const response = await fetch('/help', {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify(loc),
+       });
+       const data = await response.json();
+       if (data.status === 'success') {
+         modalTitle.textContent = 'Help is on the way!';
+         modalMessage.textContent = 'An alert with your location was sent to your emergency contact.';
+         contactText.textContent = `Alert sent to: ${data.emergency_contact}`;
+       } else {
+         modalTitle.textContent = 'Alert not sent';
+         modalMessage.textContent = data.error || 'Something went wrong. Please call emergency services directly (112).';
+       }
+     } catch (error) {
+       console.error('Error:', error);
+       modalTitle.textContent = 'Alert not sent';
+       modalMessage.textContent = 'Could not reach the server. Please call emergency services directly (112).';
+     } finally {
+       sending = false;
+     }
+   }
 
-const Modal = document.getElementById("modal");
-   const openModal = document.getElementById("open-modal");
-   const closeModal = document.getElementById("close-modal");
-   
-   openModal.addEventListener("click" , ()=>{
-    Modal.showModal();
-   })
+   sosButton.addEventListener('click', sendSOS);
+   sosButton.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); sendSOS(); } });
+   document.getElementById('close-modal').addEventListener('click', () => modal.close());
 
-   closeModal.addEventListener("click" , ()=>{
-    Modal.close();
-   })
-
+   // Show the current location as soon as the page loads
+   if (locationText.textContent.trim() === 'Detecting…') getLocation().then(showLocation);
  </script>
 
 </body>

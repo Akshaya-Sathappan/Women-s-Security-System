@@ -9,7 +9,7 @@
   </head>
   <body>
     <div class="sidebar">
-      <img src="../static/images/logo.png" />
+      <img class="logo" src="{{ url_for('static', filename='images/logo.svg') }}" alt="Women Safety logo" />
       <div class="sildebar-menu">
         <a href="./home" class=" ">
           <svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" fill="none">
@@ -85,10 +85,10 @@
             />
           </svg>
         </a>
-        <a href="/" style="text-decoration: none; color: black; font-size: 1.2rem; border: 2px solid black ; padding: .5rem 1rem; border-radius: 10px;"> logout </a>
+        <a href="/logout" style="text-decoration: none; color: black; font-size: 1.2rem; border: 2px solid black ; padding: .5rem 1rem; border-radius: 10px;"> logout </a>
       </div>
       <div>
-        <img class="munu-icon" src="../static/images/munu-icon.png" />
+        <img class="munu-icon" src="{{ url_for('static', filename='images/menu-icon.svg') }}" alt="Menu" />
       </div>
     </div>
 
@@ -159,13 +159,19 @@
                         // document.getElementById('connect-response').textContent = response.message;
                     } else {
                         console.error('Error:', xhr.status, xhr.statusText);
+                        var message = 'Could not find a nearby police station.';
+                        try { message = JSON.parse(xhr.responseText).error || message; } catch (e) {}
+                        document.getElementById('map').textContent = message;
                     }
                 }
             };
 
+            document.getElementById('map').textContent = 'Finding the nearest police station…';
             xhr.send(data);
         }).catch(function (error) {
             console.error('Error getting location:', error);
+            document.getElementById('map').textContent =
+                'Location access is needed to find the nearest police station. Allow location in your browser and reload.';
         });
 
         // Function to get current location

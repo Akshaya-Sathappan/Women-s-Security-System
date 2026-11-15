@@ -87,6 +87,8 @@ background: linear-gradient(180deg, #61439A 0%, #E6BFFF 100%);
 
 
 .addres-btn{
+    background: #efefef;
+    text-align: center;
     padding: 1rem;
      border-radius: 10px; font-weight: 600; color:black;
      border : none;
@@ -222,4 +224,7 @@ border: 50px solid rgba(251, 94, 44, 0.25);
         width: 300px;
         height: 300px;
     }
+}
+.sidebar img.logo{
+    padding: 1rem .75rem 0;
 }

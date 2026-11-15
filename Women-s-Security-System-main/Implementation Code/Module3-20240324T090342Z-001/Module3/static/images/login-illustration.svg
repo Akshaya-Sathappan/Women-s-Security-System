@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Women Safety">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F6EDFF"/>
+      <stop offset="1" stop-color="#E6BFFF"/>
+    </linearGradient>
+    <linearGradient id="sh" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#61439A"/>
+      <stop offset="1" stop-color="#9B7BD6"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#bg)"/>
+  <!-- Soft background circles -->
+  <circle cx="120" cy="160" r="120" fill="#fff" opacity="0.45"/>
+  <circle cx="700" cy="860" r="170" fill="#fff" opacity="0.35"/>
+  <circle cx="680" cy="200" r="60" fill="#61439A" opacity="0.08"/>
+  <!-- Map-style route -->
+  <path d="M150 880 C260 810 300 940 420 860 S600 760 660 820" fill="none" stroke="#61439A" stroke-width="8" stroke-linecap="round" stroke-dasharray="2 22" opacity="0.5"/>
+  <circle cx="150" cy="880" r="14" fill="#61439A" opacity="0.6"/>
+  <path d="M660 760 C640 760 626 775 626 794 C626 820 660 850 660 850 C660 850 694 820 694 794 C694 775 680 760 660 760 Z" fill="#61439A"/>
+  <circle cx="660" cy="793" r="11" fill="#fff"/>
+  <!-- Shield with heart -->
+  <path d="M400 230 L540 282 V392 C540 482 480 542 400 572 C320 542 260 482 260 392 V282 Z" fill="url(#sh)"/>
+  <path d="M400 480 C358 446 330 420 330 386 C330 360 349 342 371 342 C386 342 397 350 400 362 C403 350 414 342 429 342 C451 342 470 360 470 386 C470 420 442 446 400 480 Z" fill="#fff"/>
+  <text x="400" y="650" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-size="44" font-weight="700" fill="#3B2A63">Women Safety</text>
+  <text x="400" y="700" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-size="24" fill="#61439A">Safe routes · Nearest help · One-tap SOS</text>
+</svg>

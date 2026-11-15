@@ -180,3 +180,6 @@ background: linear-gradient(180deg, #61439A 0%, #E6BFFF 100%);
 
      }
 }
+.sidebar img.logo{
+    padding: 1rem .75rem 0;
+}
